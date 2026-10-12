@@ -33,20 +33,30 @@ import java.util.List;
  */
 public class ServicoMatricula {
 
+    private final AlunoDAO alunoDAO;
+
+    public ServicoMatricula(AlunoDAO alunoDAO) {
+        this.alunoDAO = alunoDAO;
+    }
+
     public void matricular(Aluno aluno) {
-        // --- regra de negócio (é o que esta classe deveria fazer) ---
+        // --- regra de negócio ---
         if (aluno.getMedia() < 0 || aluno.getMedia() > 10) {
             throw new IllegalArgumentException("Média inválida: " + aluno.getMedia());
         }
 
-        // --- ...e, no meio dela, acesso a dados (não deveria estar aqui) ---
-        String sql = "INSERT INTO aluno (nome, matricula, media) VALUES ('"
-                + aluno.getNome() + "', '"
-                + aluno.getMatricula() + "', "
-                + aluno.getMedia() + ")";
-        BancoSimulado.executar(sql, aluno.toString());
+        alunoDAO.inserir(aluno);
     }
 
+    public void gerarRelatorio() {
+        List<Aluno> alunos = alunoDAO.listarTodos();
+
+        System.out.println("=== Relatório de Alunos ===");
+        for (Aluno aluno : alunos) {
+            System.out.println(aluno);
+        }
+    }
+}
     public void gerarRelatorio() {
         // Duplicação: o mesmo acesso a dados aparece aqui de novo.
         String sql = "SELECT nome, matricula, media FROM aluno";
