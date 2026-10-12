@@ -8,30 +8,36 @@ package siga;
  * negócio conhece a tecnologia de persistência. Sua tarefa é extrair essa
  * responsabilidade para um DAO.
  */
+package siga;
+
 public class Main {
-
     public static void main(String[] args) {
-        System.out.println("=== SIGA - Atividade de Persistência e DAO (código inicial) ===\n");
+        System.out.println("=== SIGA — Demonstração Padrão DAO ===");
 
-        ServicoMatricula servico = new ServicoMatricula();
+        // 1. Instanciação do DAO em memória
+        AlunoDAO daoMemoria = new AlunoDAOMemoria();
 
-        servico.matricular(new Aluno("Maria Silva", "2026001", 8.5));
-        servico.matricular(new Aluno("João Souza",  "2026002", 6.0));
-        System.out.println();
+        // 2. Injeção de dependência no serviço de domínio
+        ServicoMatricula servico = new ServicoMatricula(daoMemoria);
 
+        // 3. Matrícula com dados válidos
+        System.out.println("\n--- Matriculando alunos ---");
+        Aluno aluno1 = new Aluno("Ana Silva", "RA12345", 8.5);
+        Aluno aluno2 = new Aluno("Carlos Souza", "RA67890", 9.0);
+
+        servico.matricular(aluno1);
+        servico.matricular(aluno2);
+
+        // 4. Relatório extraído via DAO
         servico.gerarRelatorio();
 
-        // A regra de negócio funciona: média inválida é rejeitada.
-        System.out.println();
+        // 5. Teste da regra de negócio (sem precisar de infraestrutura de banco)
+        System.out.println("\n--- Teste de validação de regra de negócio (média inválida) ---");
         try {
-            servico.matricular(new Aluno("Teste Inválido", "2026003", -1));
+            Aluno alunoInvalido = new Aluno("Aluno Teste", "RA00000", -1.0);
+            servico.matricular(alunoInvalido);
         } catch (IllegalArgumentException e) {
-            System.out.println("Regra de negócio funcionou: " + e.getMessage());
+            System.out.println("Regra validada com sucesso sem banco: " + e.getMessage());
         }
-
-        System.out.println("\nObserve: para testar a regra da média, foi preciso passar");
-        System.out.println("pela camada de persistência. O SQL está dentro da classe de");
-        System.out.println("negócio (viola SRP e DIP) e o acesso a dados está duplicado.");
-        System.out.println("Sua tarefa é extrair a interface AlunoDAO e injetá-la no serviço.");
     }
 }
